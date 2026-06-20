@@ -320,8 +320,30 @@ document.getElementById('clearBtn').addEventListener('click', () => {
 });
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', {scope: './'})
+      .then(reg => console.log('SW ok', reg.scope))
+      .catch(err => console.log('SW fail', err));
+  });
 }
+
+// Prompt PWA install
+let deferredPrompt;
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+  }
+}
+window.addEventListener('beforeinstallprompt', e => {
+  deferredPrompt = e;
+  const btn = document.getElementById('installBtn');
+  if (btn) { btn.style.display = 'block'; }
+});
+window.addEventListener('appinstalled', () => {
+  const btn = document.getElementById('installBtn');
+  if (btn) { btn.style.display = 'none'; }
+});
 
 renderMonth();
 </script>
